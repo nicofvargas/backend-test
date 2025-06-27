@@ -1,7 +1,7 @@
 package com.java.backend_test;
 
-import com.java.backend_test.entity.Producto;
-import com.java.backend_test.repository.ProductoRepository;
+import com.java.backend_test.producto.Producto;
+import com.java.backend_test.producto.repository.ProductoRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

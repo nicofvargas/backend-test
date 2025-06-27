@@ -1,4 +1,4 @@
-package com.java.backend_test.entity;
+package com.java.backend_test.producto;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

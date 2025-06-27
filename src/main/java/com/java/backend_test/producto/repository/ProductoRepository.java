@@ -1,6 +1,6 @@
-package com.java.backend_test.repository;
+package com.java.backend_test.producto.repository;
 
-import com.java.backend_test.entity.Producto;
+import com.java.backend_test.producto.Producto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
