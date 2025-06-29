@@ -1,45 +1,60 @@
 package com.java.backend_test.shared.config;
 
+import com.java.backend_test.shared.security.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-
-import static org.springframework.security.config.Customizer.withDefaults;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    private final JwtAuthFilter jwtAuthFilter;
+
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
+        this.jwtAuthFilter = jwtAuthFilter;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // 1. Deshabilitar CSRF para APIs REST sin estado
                 .csrf(csrf -> csrf.disable())
-                // 2. Configurar las reglas de autorización de las peticiones
+                // 1. Configurar la gestión de sesiones como STATELESS
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        //reglas de seguridad
-                        // 1. Permitir peticiones GET a /api/v1/productos a cualquier usuario autenticado
+                        // Endpoints públicos
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/usuarios").permitAll() // Registro
+
+                        // Endpoints de gestión de usuarios (SOLO ADMIN)
+                        .requestMatchers("/api/v1/usuarios/**").hasRole("ADMIN")
+
+
+                        // Endpoints de productos
                         .requestMatchers(HttpMethod.GET, "/api/v1/productos/**").authenticated()
-                        // 2. Permitir peticiones POST, PUT, DELETE solo a usuarios con el rol 'ADMIN'
-                        .requestMatchers(HttpMethod.POST, "/api/v1/productos").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/productos/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/productos/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/usuarios").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/usuarios").permitAll()
-                        // 3. Cualquier otra petición no configurada explícitamente, denegarla (opcional pero seguro)
-                        .anyRequest().denyAll()
+                        .requestMatchers("/api/v1/productos/**").hasRole("ADMIN")
+
+                        // 3. Proteger el resto de los endpoints
+                        .anyRequest().authenticated()
                 )
-                // 3. Habilitar la autenticación básica HTTP
-                .httpBasic(withDefaults());
+                // 4. Añadir nuestro filtro JWT antes del filtro de autenticación estándar
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
