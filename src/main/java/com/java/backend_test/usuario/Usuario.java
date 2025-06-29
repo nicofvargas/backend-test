@@ -21,4 +21,9 @@ public class Usuario {
 
     @Column(nullable = false)
     private String role;
+
+    @Enumerated(EnumType.STRING) // Le dice a JPA que guarde el nombre del Enum ("ACTIVO") en lugar de su número (1)
+    @Column(nullable = false)
+    private EstadoUsuario estado;
+    private String verificationToken; // Este puede ser nulo una vez que la cuenta está activa
 }

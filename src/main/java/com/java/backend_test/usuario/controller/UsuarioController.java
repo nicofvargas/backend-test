@@ -1,6 +1,7 @@
 package com.java.backend_test.usuario.controller;
 
 
+import com.java.backend_test.auth.dto.UpdateUserRoleRequest;
 import com.java.backend_test.usuario.dto.UsuarioRequest;
 import com.java.backend_test.usuario.dto.UsuarioResponse;
 import com.java.backend_test.usuario.service.UsuarioService;
@@ -40,5 +41,15 @@ public class UsuarioController {
     public ResponseEntity<Void> eliminarUsuario(@PathVariable Long id) {
         usuarioService.eliminarUsuario(id);
         return ResponseEntity.noContent().build();
+    }
+
+    //PUT
+    @PutMapping("/{id}/role")
+    public ResponseEntity<UsuarioResponse> updateUserRole(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateUserRoleRequest request) {
+
+        UsuarioResponse updatedUser = usuarioService.actualizarRol(id, request.newRole());
+        return ResponseEntity.ok(updatedUser);
     }
 }
