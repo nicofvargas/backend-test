@@ -30,9 +30,18 @@ public class SecurityConfig {
                 // 1. Configurar la gestión de sesiones como STATELESS
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // 2. Permitir acceso público a los endpoints de autenticación y registro
+                        // Endpoints públicos
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/usuarios").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/usuarios").permitAll() // Registro
+
+                        // Endpoints de gestión de usuarios (SOLO ADMIN)
+                        .requestMatchers("/api/v1/usuarios/**").hasRole("ADMIN")
+
+
+                        // Endpoints de productos
+                        .requestMatchers(HttpMethod.GET, "/api/v1/productos/**").authenticated()
+                        .requestMatchers("/api/v1/productos/**").hasRole("ADMIN")
+
                         // 3. Proteger el resto de los endpoints
                         .anyRequest().authenticated()
                 )
