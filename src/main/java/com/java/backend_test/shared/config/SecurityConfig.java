@@ -37,11 +37,6 @@ public class SecurityConfig {
                         // Endpoints de gestión de usuarios (SOLO ADMIN)
                         .requestMatchers("/api/v1/usuarios/**").hasRole("ADMIN")
 
-
-                        // Endpoints de productos
-                        .requestMatchers(HttpMethod.GET, "/api/v1/productos/**").authenticated()
-                        .requestMatchers("/api/v1/productos/**").hasRole("ADMIN")
-
                         // 3. Proteger el resto de los endpoints
                         .anyRequest().authenticated()
                 )
