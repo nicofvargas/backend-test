@@ -1,8 +1,7 @@
 package com.java.backend_test.auth.controller;
 
-import com.java.backend_test.auth.dto.ChangePasswordRequest;
-import com.java.backend_test.auth.dto.LoginRequest;
-import com.java.backend_test.auth.dto.LoginResponse;
+import com.java.backend_test.auth.dto.*;
+import com.java.backend_test.shared.dto.ApiResponse;
 import com.java.backend_test.shared.security.JwtProvider;
 import com.java.backend_test.usuario.dto.UsuarioResponse;
 import com.java.backend_test.usuario.service.UsuarioService;
@@ -73,8 +72,23 @@ public class AuthController {
     }
 
     @GetMapping("/verify")
-    public ResponseEntity<String> verifyUserAccount(@RequestParam("token") String token) {
+    public ResponseEntity<ApiResponse> verifyUserAccount(@RequestParam("token") String token) {
         usuarioService.verificarUsuario(token);
-        return ResponseEntity.ok("¡Cuenta verificada exitosamente! Ahora puedes iniciar sesión.");
+        ApiResponse response = new ApiResponse(true, "¡Cuenta verificada exitosamente! Ahora puedes iniciar sesión.");
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        usuarioService.generatePasswordResetToken(request.email());
+        ApiResponse response = new ApiResponse(true, "Si existe una cuenta con el email proporcionado, se ha enviado un token de reseteo.");
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        usuarioService.resetPassword(request.token(), request.newPassword());
+        ApiResponse response = new ApiResponse(true, "La contraseña ha sido restablecida exitosamente.");
+        return ResponseEntity.ok(response);
     }
 }

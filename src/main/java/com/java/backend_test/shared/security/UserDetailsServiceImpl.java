@@ -4,6 +4,7 @@ import com.java.backend_test.usuario.EstadoUsuario;
 import com.java.backend_test.usuario.Usuario;
 import com.java.backend_test.usuario.repository.UsuarioRepository;
 import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,8 +29,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
 
         // --- NUEVA COMPROBACIÓN DE ESTADO ---
-        if (usuario.getEstado() != EstadoUsuario.ACTIVO) {
+        if (usuario.getEstado() == EstadoUsuario.PENDIENTE_VERIFICACION) {
             throw new DisabledException("La cuenta de usuario para '" + username + "' no está activa.");
+        }
+
+        if (usuario.getEstado() == EstadoUsuario.BLOQUEADO) {
+            throw new LockedException("La cuenta de usuario para '" + username + "' está bloqueada.");
         }
 
         // 2. Construir el objeto UserDetails que Spring Security necesita
