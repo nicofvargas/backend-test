@@ -1,7 +1,54 @@
 # 📘 API REST - Motor de Usuarios v1.0
 
 > Documentación para desarrolladores frontend que deseen consumir la API del proyecto **backend-test**.
+> Este motor de usuarios es una plantilla inicial para reutilizarse en distintos proyectos.
+### Tecnologías Principales
 
+*   **Lenguaje:** Java 21
+*   **Framework Principal:** Spring Boot 3
+*   **Acceso a Datos:** Spring Data JPA
+*   **Implementación de JPA:** Hibernate
+*   **Base de Datos:** PostgreSQL (para persistencia) y H2 (para pruebas iniciales)
+*   **Gestor de Dependencias y Construcción:** Apache Maven
+### Arquitectura y Patrones de Diseño
+
+*   **Arquitectura General:** Monolito bien estructurado con el patrón **Package by Feature**, que organiza el código en módulos de negocio independientes (`usuario`, `auth`, etc.) para máxima cohesión y escalabilidad.
+*   **Capas de la Aplicación:** Diseño clásico de 3 capas:
+    *   **Capa de Controlador (`@RestController`):** Expone los endpoints REST y maneja las peticiones/respuestas HTTP.
+    *   **Capa de Servicio (`@Service`):** Contiene toda la lógica de negocio, desacoplada de la web y de los datos.
+    *   **Capa de Repositorio (`@Repository`):** Abstrae el acceso a la base de datos a través de interfaces de Spring Data JPA.
+*   **Patrón DTO (Data Transfer Object):** Se utiliza para desacoplar la API de la estructura interna de la base de datos, con DTOs específicos para peticiones (`Request`) y respuestas (`Response`).
+
+### Características de Seguridad Implementadas
+
+La seguridad es un pilar fundamental de este proyecto, implementada con **Spring Security**.
+
+*   **Autenticación Basada en Tokens (JWT):**
+    *   Se utiliza el estándar **JSON Web Tokens** para una autenticación `stateless` (sin estado), ideal para APIs consumidas por frontends modernos (SPAs) y aplicaciones móviles.
+    *   La librería `jjwt` se encarga de la creación y validación de los tokens.
+    *   Se ha implementado un endpoint de login (`POST /api/auth/login`) que, tras validar las credenciales, emite un token JWT firmado con una clave secreta.
+
+*   **Autorización Basada en Roles:**
+    *   El acceso a los endpoints está controlado por roles (`USER`, `ADMIN`).
+    *   La configuración de seguridad (`SecurityConfig`) define de manera granular qué roles pueden acceder a qué endpoints y con qué métodos HTTP.
+
+*   **Cifrado de Contraseñas:**
+    *   Las contraseñas de los usuarios **nunca** se almacenan en texto plano. Se utiliza el algoritmo **BCrypt** (`BCryptPasswordEncoder`) para hashearlas de forma segura antes de persistirlas en la base de datos.
+
+### Ciclo de Vida Completo de la Cuenta de Usuario
+
+Se ha implementado un "motor de usuarios" completo y reutilizable que gestiona todo el ciclo de vida de una cuenta:
+
+*   **Registro Seguro:** Un endpoint público permite el registro de nuevos usuarios, asignando por defecto el rol `USER`.
+*   **Verificación de Email:** Las nuevas cuentas se crean en estado `PENDIENTE_VERIFICACION` y se debe usar un token (simulado por consola) para activarlas antes de poder iniciar sesión.
+*   **Recuperación de Contraseña:** Un flujo completo de "he olvidado mi contraseña" que permite a los usuarios solicitar un token de reseteo y establecer una nueva contraseña de forma segura.
+*   **Gestión de Estado de Cuenta:** Los administradores pueden `BLOQUEAR` o `ACTIVAR` cuentas de usuario, impidiendo o permitiendo su acceso al sistema.
+
+### Calidad y Robustez de la API
+
+*   **Manejo de Errores Global:** Un `GlobalExceptionHandler` centralizado captura las excepciones de la aplicación y devuelve respuestas de error en formato JSON consistentes y con los códigos de estado HTTP apropiados (`404`, `400`, `401`, `403`, `409`).
+*   **Validación de Datos:** Se utiliza `jakarta.validation` (`@Valid`, `@NotBlank`, etc.) en los DTOs de petición para validar los datos de entrada antes de que lleguen a la lógica de negocio.
+*   **Paginación y Ordenamiento:** Los endpoints que devuelven listas soportan paginación (`page`, `size`) y ordenamiento (`sort`) para manejar grandes volúmenes de datos de manera eficiente.
 ---
 
 ## 🧩 Índice
