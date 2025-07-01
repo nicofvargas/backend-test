@@ -30,19 +30,22 @@ public class SecurityConfig {
                 // 1. Configurar la gestión de sesiones como STATELESS
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Endpoints públicos
+                        // --- 1. Endpoints Públicos ---
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/usuarios").permitAll() // Registro
 
-                        // Endpoints de gestión de usuarios (SOLO ADMIN)
-                        .requestMatchers("/api/v1/usuarios/**").hasRole("ADMIN")
+                        // --- 2. Endpoints de Gestión de Usuarios (SOLO ADMIN) ---
+                        .requestMatchers(HttpMethod.GET, "/api/v1/usuarios", "/api/v1/usuarios/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/usuarios/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/usuarios/**").hasRole("ADMIN")
 
+                        // --- 3. Endpoints de Productos ---
+                        .requestMatchers(HttpMethod.GET, "/api/v1/productos", "/api/v1/productos/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/productos").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/productos/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/productos/**").hasRole("ADMIN")
 
-                        // Endpoints de productos
-                        .requestMatchers(HttpMethod.GET, "/api/v1/productos/**").authenticated()
-                        .requestMatchers("/api/v1/productos/**").hasRole("ADMIN")
-
-                        // 3. Proteger el resto de los endpoints
+                        // --- 4. Regla Final ---
                         .anyRequest().authenticated()
                 )
                 // 4. Añadir nuestro filtro JWT antes del filtro de autenticación estándar
